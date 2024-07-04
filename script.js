@@ -35,17 +35,22 @@ function submitForm(event, formId) {
         const reader = new FileReader();
         reader.onload = function(e) {
             formData.append('config_text', e.target.result);
-            sendFormData(formData);
+            sendFormData(formData, formId);
         };
         reader.readAsText(configFile);
     } else {
-        sendFormData(formData);
+        sendFormData(formData, formId);
     }
 }
 
-function sendFormData(formData) {
-    const createAdButton = document.querySelector('.create-ad-button');
+function sendFormData(formData, formId) {
+    const createAdButton = document.querySelector(`#${formId} .create-ad-button`);
+    const goBackButton = document.querySelector(`#${formId} .go-back-button`);
     createAdButton.disabled = true;
+    createAdButton.textContent = 'Processing...';
+    createAdButton.style.backgroundColor = '#3e3e3e';
+    goBackButton.disabled = true;
+    goBackButton.style.backgroundColor = '#3e3e3e';
 
     fetch('http://localhost:5000/create_campaign', {
         method: 'POST',
@@ -54,15 +59,23 @@ function sendFormData(formData) {
     .then(response => response.json())
     .then(data => {
         createAdButton.disabled = false;
+        createAdButton.textContent = 'Create Ad';
+        createAdButton.style.backgroundColor = '';
+        goBackButton.disabled = false;
+        goBackButton.style.backgroundColor = '';
         if (data.error) {
+            console.error('Error:', data.error);
             alert(data.error);
         } else {
-            alert('Campaign and Ad Sets created successfully');
             showSuccessScreen();
         }
     })
     .catch(error => {
         createAdButton.disabled = false;
+        createAdButton.textContent = 'Create Ad';
+        createAdButton.style.backgroundColor = '';
+        goBackButton.disabled = false;
+        goBackButton.style.backgroundColor = '';
         console.error('Error:', error);
         alert('An error occurred while creating the campaign');
     });
@@ -71,4 +84,9 @@ function sendFormData(formData) {
 function showSuccessScreen() {
     document.getElementById(previousForm).classList.add('hidden');
     document.getElementById('successScreen').classList.remove('hidden');
+}
+
+function showPreviousForm() {
+    document.getElementById('successScreen').classList.add('hidden');
+    document.getElementById(previousForm).classList.remove('hidden');
 }
