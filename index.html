@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Ads Campaign</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Facebook Ads Campaign Manager</h1>
+        <div class="form-container" id="mainForm">
+            <button class="option-button" onclick="showNewCampaignForm()">Create New Campaign</button>
+            <button class="option-button" onclick="showExistingCampaignForm()">Use Existing Campaign</button>
+        </div>
+
+        <div class="form-container hidden" id="newCampaignForm">
+            <h2>Create New Campaign</h2>
+            <form id="newCampaign">
+                <label for="campaignName">Campaign Name:</label>
+                <input type="text" id="campaignName" name="campaignName" required>
+
+                <label for="uploadFolders">Upload Folders:</label>
+                <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory directory multiple required>
+
+                <button type="button" class="edit-config-button">Edit Config</button>
+
+                <button type="submit" class="create-ad-button">Create Ad</button>
+            </form>
+        </div>
+
+        <div class="form-container hidden" id="existingCampaignForm">
+            <h2>Use Existing Campaign</h2>
+            <form id="existingCampaign">
+                <label for="campaignId">Campaign ID:</label>
+                <input type="text" id="campaignId" name="campaignId" required>
+
+                <button type="submit" class="create-ad-button">Create Ad</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
