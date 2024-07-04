@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook Ads Campaign</title>
+    <title>Facebook Ads Campaign Manager</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,47 +16,42 @@
 
         <div class="form-container hidden" id="newCampaignForm">
             <h2>Create New Campaign</h2>
-            <form id="newCampaign">
+            <form id="newCampaign" onsubmit="submitForm(event, 'newCampaign')" enctype="multipart/form-data">
                 <label for="campaignName">Campaign Name:</label>
                 <input type="text" id="campaignName" name="campaignName" required>
 
                 <label for="uploadFolders">Upload Folders:</label>
                 <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory directory multiple required>
 
-                <button type="button" class="edit-config-button" onclick="openConfigEditor('newCampaign')">Edit Config</button>
+                <label for="configFile">Upload Config File (Optional):</label>
+                <input type="file" id="configFile" name="configFile" accept=".txt">
 
                 <button type="submit" class="create-ad-button">Create Ad</button>
+                <button type="button" class="go-back-button" onclick="showMainForm()">Go Back</button>
             </form>
-            <button class="go-back-button" onclick="showMainForm()">Go Back</button>
         </div>
 
         <div class="form-container hidden" id="existingCampaignForm">
             <h2>Use Existing Campaign</h2>
-            <form id="existingCampaign">
+            <form id="existingCampaign" onsubmit="submitForm(event, 'existingCampaign')" enctype="multipart/form-data">
                 <label for="campaignId">Campaign ID:</label>
                 <input type="text" id="campaignId" name="campaignId" required>
 
                 <label for="uploadFolders">Upload Folders:</label>
                 <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory directory multiple required>
 
-                <button type="button" class="edit-config-button" onclick="openConfigEditor('existingCampaign')">Edit Config</button>
+                <label for="configFile">Upload Config File (Optional):</label>
+                <input type="file" id="configFile" name="configFile" accept=".txt">
 
                 <button type="submit" class="create-ad-button">Create Ad</button>
+                <button type="button" class="go-back-button" onclick="showMainForm()">Go Back</button>
             </form>
-            <button class="go-back-button" onclick="showMainForm()">Go Back</button>
-        </div>
-
-        <div class="form-container hidden" id="configEditor">
-            <h2>Edit Config</h2>
-            <textarea id="configTextArea" rows="20" cols="60"></textarea>
-            <button class="save-config-button" onclick="saveConfig()">Save Config</button>
-            <button class="go-back-button" onclick="closeConfigEditor()">Go Back</button>
         </div>
 
         <div class="form-container hidden" id="successScreen">
             <h2>Success!</h2>
             <p>Your ad campaign has been successfully created.</p>
-            <button class="go-back-button" onclick="showPreviousForm()">Go Back</button>
+            <button class="go-back-button" onclick="showMainForm()">Go Back</button>
         </div>
     </div>
 
