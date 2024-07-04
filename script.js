@@ -52,7 +52,7 @@ function sendFormData(formData, formId) {
     goBackButton.disabled = true;
     goBackButton.style.backgroundColor = '#3e3e3e';
 
-    fetch('http://localhost:5000/create_campaign', {
+    fetch('https://fb-ads-backend.onrender.com/create_campaign', {
         method: 'POST',
         body: formData
     })
