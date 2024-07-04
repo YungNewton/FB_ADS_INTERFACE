@@ -14,7 +14,7 @@ body {
     border-radius: 8px;
 }
 
-h1 {
+h1, h2 {
     text-align: center;
     color: #333;
 }
@@ -29,7 +29,7 @@ h1 {
     display: none;
 }
 
-.option-button, .edit-config-button, .create-ad-button {
+.option-button, .edit-config-button, .create-ad-button, .go-back-button, .save-config-button {
     background-color: #007bff;
     color: #fff;
     padding: 10px 20px;
@@ -39,7 +39,7 @@ h1 {
     cursor: pointer;
 }
 
-.option-button:hover, .edit-config-button:hover, .create-ad-button:hover {
+.option-button:hover, .edit-config-button:hover, .create-ad-button:hover, .go-back-button:hover, .save-config-button:hover {
     background-color: #0056b3;
 }
 
@@ -48,7 +48,7 @@ label {
     font-weight: bold;
 }
 
-input[type="text"], input[type="file"] {
+input[type="text"], input[type="file"], textarea {
     width: 100%;
     padding: 8px;
     margin: 10px 0;
@@ -58,4 +58,10 @@ input[type="text"], input[type="file"] {
 
 form {
     width: 100%;
+}
+
+p {
+    text-align: center;
+    font-size: 1.2em;
+    color: #333;
 }
