@@ -103,3 +103,20 @@ p {
     color: #333;
     font-weight: bold;
 }
+
+/* Styles for the Edit Config button */
+.edit-config-button, .save-config-button {
+    background-color: #ffc107; /* Yellow background */
+    color: #fff;
+    padding: 10px 20px; /* Same padding */
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.edit-config-button:hover {
+    background-color: #e0a800; /* Darker yellow on hover */
+}
+

@@ -23,8 +23,7 @@
                 <label for="uploadFolders">Upload Folders:</label>
                 <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory directory multiple required>
 
-                <label for="configFile">Upload Config File (Optional):</label>
-                <input type="file" id="configFile" name="configFile" accept=".txt">
+                <button type="button" class="edit-config-button" onclick="showConfigForm()">Edit Config</button>
 
                 <button type="submit" class="create-ad-button">Create Ad</button>
                 <button type="button" class="go-back-button" onclick="showForm('mainForm')">Go Back</button>
@@ -47,8 +46,7 @@
                 <label for="uploadFolders">Upload Folder:</label>
                 <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory directory multiple required>
 
-                <label for="configFile">Upload Config File (Optional):</label>
-                <input type="file" id="configFile" name="configFile" accept=".txt">
+                <button type="button" class="edit-config-button" onclick="showConfigForm()">Edit Config</button>
 
                 <button type="submit" class="create-ad-button">Create Ad</button>
                 <button type="button" class="go-back-button" onclick="showForm('mainForm')">Go Back</button>
@@ -60,6 +58,26 @@
                 </div>
                 <button class="cancel-button" onclick="cancelUpload()">Cancel</button>
             </div>
+        </div>
+
+        <div class="form-container hidden" id="configForm">
+            <h2>Edit Config</h2>
+            <form id="config" onsubmit="submitConfigForm(event)">
+                <label for="facebook_page_id">Facebook Page ID:</label>
+                <input type="text" id="facebook_page_id" name="facebook_page_id" value="102076431877514">
+
+                <label for="headline">Headline:</label>
+                <input type="text" id="headline" name="headline" value="No More Neuropathic Foot Pain">
+
+                <label for="link">Link:</label>
+                <input type="text" id="link" name="link" value="https://kyronaclinic.com/pages/review-1">
+
+                <label for="utm_parameters">UTM Parameters:</label>
+                <input type="text" id="utm_parameters" name="utm_parameters" value="?utm_source=Facebook&utm_medium={{adset.name}}&utm_campaign={{campaign.name}}&utm_content={{ad.name}}">
+
+                <button type="submit" class="save-config-button">Save Config</button>
+                <button type="button" class="go-back-button" onclick="hideConfigForm()">Cancel</button>
+            </form>
         </div>
 
         <div class="form-container hidden" id="successScreen">
