@@ -1,7 +1,7 @@
 let previousForm = '';
 let currentTaskId;
 let configData = {};
-const socket = io('http://localhost:5000');  // Replace with your backend URL
+const socket = io('https://fb-ads-backend.onrender.com');  // Replace with your backend URL
 
 function showForm(formId) {
     const forms = ['mainForm', 'newCampaignForm', 'existingCampaignForm', 'configForm', 'successScreen'];
@@ -92,9 +92,11 @@ function startUpload(formData, formId, taskId) {
     editConfigButton.classList.add('hidden');
     progressBarFill.style.width = '0%';
     progressBarFill.textContent = '0%';
+    progressBarStep.classList.add('hidden'); // Hide the progress step initially
 
     socket.on('progress', (data) => {
         if (data.task_id === taskId) {
+            progressBarStep.classList.remove('hidden'); // Show the progress step when receiving data
             updateProgressBar(data.progress, data.step, progressContainerId);
         }
     });
@@ -112,7 +114,7 @@ function startUpload(formData, formId, taskId) {
         }
     });
 
-    fetch('http://localhost:5000/create_campaign', {
+    fetch('https://fb-ads-backend.onrender.com/create_campaign', {
         method: 'POST',
         body: formData
     })
@@ -160,7 +162,7 @@ function cancelUpload() {
     const requestBody = JSON.stringify({ task_id: currentTaskId });
     console.log('Request body:', requestBody);
 
-    fetch('http://localhost:5000/cancel_task', {
+    fetch('https://fb-ads-backend.onrender.com/cancel_task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestBody
@@ -208,6 +210,11 @@ function hideProgressBar(formId) {
     if (createAdButton) createAdButton.classList.remove('hidden');
     if (goBackButton) goBackButton.classList.remove('hidden');
     if (editConfigButton) editConfigButton.classList.remove('hidden');
+
+    // Hide the progress step and reset its content
+    const progressBarStep = progressContainer.querySelector('.progress-bar-step');
+    progressBarStep.classList.add('hidden');
+    progressBarStep.textContent = '';
 }
 
 function generateTaskId() {
