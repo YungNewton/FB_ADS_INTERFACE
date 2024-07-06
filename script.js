@@ -147,19 +147,42 @@ function updateProgressBar(progress, step, progressContainerId) {
 }
 
 function cancelUpload() {
+    // Ensure currentTaskId is set
+    if (!currentTaskId) {
+        console.error('No current task ID set.');
+        alert('No current task to cancel.');
+        return;
+    }
+
+    console.log(`Canceling upload for taskId: ${currentTaskId}`);
+    
+    // Log the request body to ensure task_id is included
+    const requestBody = JSON.stringify({ task_id: currentTaskId });
+    console.log('Request body:', requestBody);
+
     fetch('http://localhost:5000/cancel_task', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({task_id: currentTaskId})
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Cancel response:', data);
         if (data.message) {
             alert('Upload canceled');
         } else {
             alert('Error canceling upload');
         }
         hideProgressBar(previousForm);
+    })
+    .catch(error => {
+        console.error('Error during cancel fetch:', error);
+        alert('An error occurred while canceling the upload');
     });
 }
 
