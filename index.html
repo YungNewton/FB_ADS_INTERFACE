@@ -10,8 +10,8 @@
     <div class="container">
         <h1>Facebook Ads Campaign Manager</h1>
         <div class="form-container" id="mainForm">
-            <button class="option-button" onclick="showNewCampaignForm()">Create New Campaign</button>
-            <button class="option-button" onclick="showExistingCampaignForm()">Use Existing Campaign</button>
+            <button class="option-button" onclick="showForm('newCampaignForm')">Create New Campaign</button>
+            <button class="option-button" onclick="showForm('existingCampaignForm')">Use Existing Campaign</button>
         </div>
 
         <div class="form-container hidden" id="newCampaignForm">
@@ -27,8 +27,15 @@
                 <input type="file" id="configFile" name="configFile" accept=".txt">
 
                 <button type="submit" class="create-ad-button">Create Ad</button>
-                <button type="button" class="go-back-button" onclick="showMainForm()">Go Back</button>
+                <button type="button" class="go-back-button" onclick="showForm('mainForm')">Go Back</button>
             </form>
+            <div class="progress-container hidden" id="newCampaignProgressContainer">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"></div>
+                    <div class="progress-bar-step"></div>
+                </div>
+                <button class="cancel-button" onclick="cancelUpload()">Cancel</button>
+            </div>
         </div>
 
         <div class="form-container hidden" id="existingCampaignForm">
@@ -44,17 +51,25 @@
                 <input type="file" id="configFile" name="configFile" accept=".txt">
 
                 <button type="submit" class="create-ad-button">Create Ad</button>
-                <button type="button" class="go-back-button" onclick="showMainForm()">Go Back</button>
+                <button type="button" class="go-back-button" onclick="showForm('mainForm')">Go Back</button>
             </form>
+            <div class="progress-container hidden" id="existingCampaignProgressContainer">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"></div>
+                    <div class="progress-bar-step"></div>
+                </div>
+                <button class="cancel-button" onclick="cancelUpload()">Cancel</button>
+            </div>
         </div>
 
         <div class="form-container hidden" id="successScreen">
             <h2>Success!</h2>
             <p>Your ad campaign has been successfully created.</p>
-            <button class="go-back-button" onclick="showPreviousForm()">Go Back</button>
+            <button class="go-back-button" onclick="showForm(previousForm)">Go Back</button>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

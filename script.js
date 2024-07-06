@@ -1,28 +1,35 @@
 let previousForm = '';
+let currentTaskId;
+const socket = io('http://localhost:5000');  // Replace with your backend URL
 
-function showNewCampaignForm() {
-    document.getElementById('mainForm').classList.add('hidden');
-    document.getElementById('newCampaignForm').classList.remove('hidden');
-    previousForm = 'newCampaignForm';
-}
+function showForm(formId) {
+    const forms = ['mainForm', 'newCampaignForm', 'existingCampaignForm', 'successScreen'];
+    forms.forEach(form => {
+        document.getElementById(form).classList.add('hidden');
+    });
+    document.getElementById(formId).classList.remove('hidden');
 
-function showExistingCampaignForm() {
-    document.getElementById('mainForm').classList.add('hidden');
-    document.getElementById('existingCampaignForm').classList.remove('hidden');
-    previousForm = 'existingCampaignForm';
-}
+    // Make buttons visible again when showing the form
+    if (formId !== 'successScreen') {
+        const createAdButton = document.querySelector(`#${formId} .create-ad-button`);
+        const goBackButton = document.querySelector(`#${formId} .go-back-button`);
+        if (createAdButton) createAdButton.classList.remove('hidden');
+        if (goBackButton) goBackButton.classList.remove('hidden');
+    }
 
-function showMainForm() {
-    document.getElementById('newCampaignForm').classList.add('hidden');
-    document.getElementById('existingCampaignForm').classList.add('hidden');
-    document.getElementById('successScreen').classList.add('hidden');
-    document.getElementById('mainForm').classList.remove('hidden');
+    if (formId === previousForm && previousForm !== 'successScreen') {
+        hideProgressBar(formId);
+    }
+    previousForm = formId !== 'successScreen' ? formId : previousForm;
 }
 
 function submitForm(event, formId) {
     event.preventDefault();
     const form = document.getElementById(formId);
     const formData = new FormData(form);
+    const taskId = generateTaskId();
+    currentTaskId = taskId;
+    formData.append('task_id', taskId);
 
     if (formId === 'newCampaign') {
         formData.append('campaign_name', form.campaignName.value);
@@ -35,58 +42,101 @@ function submitForm(event, formId) {
         const reader = new FileReader();
         reader.onload = function(e) {
             formData.append('config_text', e.target.result);
-            sendFormData(formData, formId);
+            startUpload(formData, formId, taskId);
         };
         reader.readAsText(configFile);
     } else {
-        sendFormData(formData, formId);
+        startUpload(formData, formId, taskId);
     }
 }
 
-function sendFormData(formData, formId) {
+function startUpload(formData, formId, taskId) {
+    const progressContainer = document.getElementById(formId + 'ProgressContainer');
+    const progressBarFill = progressContainer.querySelector('.progress-bar-fill');
+    const progressBarStep = progressContainer.querySelector('.progress-bar-step');
     const createAdButton = document.querySelector(`#${formId} .create-ad-button`);
     const goBackButton = document.querySelector(`#${formId} .go-back-button`);
-    createAdButton.disabled = true;
-    createAdButton.textContent = 'Processing...';
-    createAdButton.style.backgroundColor = '#3e3e3e';
-    goBackButton.disabled = true;
-    goBackButton.style.backgroundColor = '#3e3e3e';
 
-    fetch('https://fb-ads-backend.onrender.com/create_campaign', {
+    progressContainer.classList.remove('hidden');
+    createAdButton.classList.add('hidden');
+    goBackButton.classList.add('hidden');
+    progressBarFill.style.width = '0%';
+    progressBarFill.textContent = '0%';
+
+    socket.on('progress', (data) => {
+        if (data.task_id === taskId) {
+            updateProgressBar(data.progress, data.step);
+        }
+    });
+
+    socket.on('task_complete', (data) => {
+        if (data.task_id === taskId) {
+            showForm('successScreen');
+        }
+    });
+
+    socket.on('error', (data) => {
+        if (data.task_id === taskId) {
+            alert(`Error: ${data.message}`);
+            hideProgressBar(formId);
+        }
+    });
+
+    fetch('http://localhost:5000/create_campaign', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
-        createAdButton.disabled = false;
-        createAdButton.textContent = 'Create Ad';
-        createAdButton.style.backgroundColor = '';
-        goBackButton.disabled = false;
-        goBackButton.style.backgroundColor = '';
         if (data.error) {
-            console.error('Error:', data.error);
             alert(data.error);
-        } else {
-            showSuccessScreen();
+            hideProgressBar(formId);
         }
     })
     .catch(error => {
-        createAdButton.disabled = false;
-        createAdButton.textContent = 'Create Ad';
-        createAdButton.style.backgroundColor = '';
-        goBackButton.disabled = false;
-        goBackButton.style.backgroundColor = '';
-        console.error('Error:', error);
-        alert('An error occurred while creating the campaign');
+        if (error.name === 'AbortError') {
+            alert('Upload canceled');
+        } else {
+            alert('An error occurred while creating the campaign');
+        }
+        hideProgressBar(formId);
     });
 }
 
-function showSuccessScreen() {
-    document.getElementById(previousForm).classList.add('hidden');
-    document.getElementById('successScreen').classList.remove('hidden');
+function updateProgressBar(progress, step) {
+    const progressBarFill = document.querySelector('.progress-bar-fill');
+    const progressBarStep = document.querySelector('.progress-bar-step');
+    progressBarFill.style.width = progress + '%';
+    progressBarFill.textContent = progress.toFixed(2) + '%';  // Display percentage inside the bar
+    progressBarStep.textContent = step;  // Display counter at the right end
 }
 
-function showPreviousForm() {
-    document.getElementById('successScreen').classList.add('hidden');
-    document.getElementById(previousForm).classList.remove('hidden');
+function cancelUpload() {
+    fetch('http://localhost:5000/cancel_task', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({task_id: currentTaskId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert('Upload canceled');
+        } else {
+            alert('Error canceling upload');
+        }
+        hideProgressBar(previousForm);
+    });
+}
+
+function hideProgressBar(formId) {
+    const progressContainer = document.getElementById(formId + 'ProgressContainer');
+    const createAdButton = document.querySelector(`#${formId} .create-ad-button`);
+    const goBackButton = document.querySelector(`#${formId} .go-back-button`);
+    progressContainer.classList.add('hidden');
+    createAdButton.classList.remove('hidden');
+    goBackButton.classList.remove('hidden');
+}
+
+function generateTaskId() {
+    return 'task-' + Math.random().toString(36).substr(2, 9);
 }
