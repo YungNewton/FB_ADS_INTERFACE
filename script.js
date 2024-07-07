@@ -1,7 +1,10 @@
 let previousForm = '';
 let currentTaskId;
 let configData = {};
-const socket = io('https://fb-ads-backend.onrender.com');  // Replace with your backend URL
+let uploadController;  // Controller to manage the upload cancellation
+let isUploadStarted = false;  // Flag to track if the upload has started
+let isCancelClicked = false;  // Flag to track if the cancel button was clicked
+const socket = io('https://fb-ads-backend.onrender.com');  // Update this if the backend URL changes
 
 function showForm(formId) {
     const forms = ['mainForm', 'newCampaignForm', 'existingCampaignForm', 'configForm', 'successScreen'];
@@ -108,30 +111,43 @@ function startUpload(formData, formId, taskId) {
     });
 
     socket.on('error', (data) => {
-        if (data.task_id === taskId) {
+        if (data.task_id === taskId && !isCancelClicked) {
             alert(`Error: ${data.message}`);
             hideProgressBar(formId);
         }
     });
 
+    // Create an AbortController for this upload
+    uploadController = new AbortController();
+    const signal = uploadController.signal;
+
+    // Set the flag indicating the upload has started
+    isUploadStarted = true;
+
     fetch('https://fb-ads-backend.onrender.com/create_campaign', {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal
     })
     .then(response => response.json())
     .then(data => {
         if (data.error) {
             alert(data.error);
             hideProgressBar(formId);
+        } else {
+            // Reset the upload started flag
+            isUploadStarted = false;
         }
     })
     .catch(error => {
         if (error.name === 'AbortError') {
-            alert('Upload canceled');
+            console.log('Upload canceled by user');
         } else {
             alert('An error occurred while creating the campaign');
         }
         hideProgressBar(formId);
+        // Reset the upload started flag
+        isUploadStarted = false;
     });
 }
 
@@ -158,6 +174,15 @@ function cancelUpload() {
 
     console.log(`Canceling upload for taskId: ${currentTaskId}`);
     
+    // Set the flag indicating the cancel button was clicked
+    isCancelClicked = true;
+
+    // Cancel the ongoing fetch request
+    if (uploadController) {
+        uploadController.abort();
+        uploadController = null;
+    }
+
     // Log the request body to ensure task_id is included
     const requestBody = JSON.stringify({ task_id: currentTaskId });
     console.log('Request body:', requestBody);
@@ -175,16 +200,18 @@ function cancelUpload() {
     })
     .then(data => {
         console.log('Cancel response:', data);
-        if (data.message) {
-            alert('Upload canceled');
-        } else {
-            alert('Error canceling upload');
-        }
+        alert(data.message);
         hideProgressBar(previousForm);
+        // Reset the cancel clicked flag
+        isCancelClicked = false;
     })
     .catch(error => {
         console.error('Error during cancel fetch:', error);
-        alert('An error occurred while canceling the upload');
+        if (error.name !== 'AbortError') {
+            alert('An error occurred while canceling the upload');
+        }
+        // Reset the cancel clicked flag
+        isCancelClicked = false;
     });
 }
 
