@@ -6,6 +6,15 @@ let isUploadStarted = false;  // Flag to track if the upload has started
 let isCancelClicked = false;  // Flag to track if the cancel button was clicked
 const socket = io('https://fb-ads-backend.onrender.com');  // Update this if the backend URL changes
 
+// Debugging WebSocket connection
+socket.on('connect', () => {
+    console.log('WebSocket connected');
+});
+
+socket.on('disconnect', () => {
+    console.log('WebSocket disconnected');
+});
+
 function showForm(formId) {
     const forms = ['mainForm', 'newCampaignForm', 'existingCampaignForm', 'configForm', 'successScreen'];
     forms.forEach(form => {
@@ -97,8 +106,11 @@ function startUpload(formData, formId, taskId) {
     progressBarFill.textContent = '0%';
     progressBarStep.classList.add('hidden'); // Hide the progress step initially
 
+    console.log('Setting up WebSocket listeners for task:', taskId);
+
     socket.on('progress', (data) => {
         if (data.task_id === taskId) {
+            console.log('Received progress update:', data);
             progressBarStep.classList.remove('hidden'); // Show the progress step when receiving data
             updateProgressBar(data.progress, data.step, progressContainerId);
         }
@@ -106,12 +118,14 @@ function startUpload(formData, formId, taskId) {
 
     socket.on('task_complete', (data) => {
         if (data.task_id === taskId) {
+            console.log('Task complete:', data);
             showForm('successScreen');
         }
     });
 
     socket.on('error', (data) => {
         if (data.task_id === taskId && !isCancelClicked) {
+            console.log('Error received:', data);
             alert(`Error: ${data.message}`);
             hideProgressBar(formId);
         }
@@ -123,6 +137,8 @@ function startUpload(formData, formId, taskId) {
 
     // Set the flag indicating the upload has started
     isUploadStarted = true;
+
+    console.log('Starting upload with taskId:', taskId);
 
     fetch('https://fb-ads-backend.onrender.com/create_campaign', {
         method: 'POST',
